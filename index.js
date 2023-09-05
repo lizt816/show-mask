@@ -5,7 +5,7 @@ let MyshowMaskRotate = 0;
 let MyshowMaskDiv,MyshowMaskImg;
 let MyshowMaskMyurlLis = []
 let MyshowMaskMyindex = 0;
-export function openMask(urlList,index=0) {
+export function showMask(urlList,index=0) {
  // 创建元素
  MyshowMaskDiv = document.createElement('div');
  MyshowMaskDiv.style.position = 'fixed';

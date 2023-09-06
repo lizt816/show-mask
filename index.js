@@ -95,14 +95,14 @@ export function showMask(urlList,index=0) {
   if(cssArr.indexOf('my-show-mask-switch-right') > -1){
    e.addEventListener('click',function(myShowMaskBox){
      myShowMaskBox.stopPropagation()  // 阻止事件冒泡
-     MyshowMaskMyindex = MyshowMaskMyindex===0?(MyshowMaskMyurlLis.length-1):MyshowMaskMyindex-1;
+     MyshowMaskMyindex = MyshowMaskMyindex===(MyshowMaskMyurlLis.length-1)?0:MyshowMaskMyindex+1;
      initImg(MyshowMaskMyurlLis[MyshowMaskMyindex])
    })
   }
   if(cssArr.indexOf('my-show-mask-switch-left') > -1){
    e.addEventListener('click',function(myShowMaskBox){
      myShowMaskBox.stopPropagation()  // 阻止事件冒泡
-     MyshowMaskMyindex = MyshowMaskMyindex===(MyshowMaskMyurlLis.length-1)?0:MyshowMaskMyindex+1;
+     MyshowMaskMyindex = MyshowMaskMyindex===0?(MyshowMaskMyurlLis.length-1):MyshowMaskMyindex-1;
      initImg(MyshowMaskMyurlLis[MyshowMaskMyindex])
    })
   }

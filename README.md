@@ -1,6 +1,6 @@
 ## 安装
 ```
-npm install show-mask
+npm install show-mask --save
 
 ```
 

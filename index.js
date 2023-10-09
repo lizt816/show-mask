@@ -417,8 +417,30 @@ function setIco() {
     .my-show-mask-switch-left{
      left: 40px;
     }
+    .my-show-mask-switch-left::after{
+     content:'';
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-30%, -50%) rotate(135deg);
+     border-right: 2px solid #fff;
+     border-bottom: 2px solid #fff;
+     width: 33%;
+     height: 33%;
+    }
     .my-show-mask-switch-right{
      right: 40px;
+    }
+    .my-show-mask-switch-right::after{
+     content:'';
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-70%, -50%) rotate(135deg);
+     border-left: 2px solid #fff;
+     border-top: 2px solid #fff;
+     width: 33%;
+     height: 33%;
     }
   </style>
   <div class='my-show-mask-close'>
@@ -428,10 +450,8 @@ function setIco() {
     </svg>
   </div>
   <div class='my-show-mask-switch my-show-mask-switch-right'>
-    >
   </div>  
   <div class='my-show-mask-switch my-show-mask-switch-left'>
-    <
   </div> 
 
   <div class='my-show-mask-box'>

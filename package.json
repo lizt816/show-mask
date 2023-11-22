@@ -1,6 +1,6 @@
 {
   "name": "show-mask",
-  "version": "2.0.1",
+  "version": "3.0.1",
   "description": "用于弹窗图片，生成",
   "main": "index.js",
   "scripts": {

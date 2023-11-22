@@ -1,16 +1,16 @@
 // 初始大小
 let MyshowMaskAmplify = 10;
 let MyshowMaskRotate = 0;
-let MyshowMaskDiv,MyshowMaskImg;
+let MyshowMaskDiv, MyshowMaskImg;
 let MyshowMaskMyurlLis = []
 let MyshowMaskMyindex = 0;
 let MyshowMaskSetCursorTimer = null;
-export function showMask(urlList,index=0) {
- // 创建元素
+export function showMask(urlList, index = 0) {
+ // 创建遮罩元素
  MyshowMaskDiv = document.createElement('div');
  MyshowMaskDiv.style.position = 'fixed';
  MyshowMaskDiv.style.pointerEvents = 'auto';   // 点击事件的影响
- MyshowMaskDiv.style.zIndex = geyAllDomMaxZindex()+'10';
+ MyshowMaskDiv.style.zIndex = geyAllDomMaxZindex() + '10';
  MyshowMaskDiv.style.left = '0';
  MyshowMaskDiv.style.right = '0';
  MyshowMaskDiv.style.bottom = '0';
@@ -30,188 +30,195 @@ export function showMask(urlList,index=0) {
  MyshowMaskMyurlLis = urlList
  MyshowMaskMyindex = index
  initImg(urlList[index])
- MyshowMaskDiv.innerHTML=setIco()  // 渲染图标
+ MyshowMaskDiv.innerHTML = setIco()  // 渲染图标
  let nodeList = Array.from(MyshowMaskDiv.children) // 获取到图标的信息
- nodeList.forEach(e=>{
+ nodeList.forEach(e => {
   let cssArr = Array.from(e.classList)
   // 关闭图标，关闭遮罩功能
-  if(cssArr.indexOf('my-show-mask-close') > -1){
-    e.addEventListener('click',function(){
-     divRemove()
-    })
+  if (cssArr.indexOf('my-show-mask-close') > -1) {
+   e.addEventListener('click', function () {
+    divRemove()
+   })
   }
   // 下方的缩放旋转功能
-  if(cssArr.indexOf('my-show-mask-box') > -1){
-    e.addEventListener('click',function(myShowMaskBox){
-     myShowMaskBox.stopPropagation()  // 阻止事件冒泡
+  if (cssArr.indexOf('my-show-mask-box') > -1) {
+   e.addEventListener('click', function (myShowMaskBox) {
+    myShowMaskBox.stopPropagation()  // 阻止事件冒泡
    })
    let domList = Array.from(e.children)
-   domList.forEach(domListE=>{
+   domList.forEach(domListE => {
     let domListECssArr = Array.from(domListE.classList)
     // 放大图标
-    if(domListECssArr.indexOf('my-show-mask-box-amplify') > -1){
-     domListE.addEventListener('click',function(){
+    if (domListECssArr.indexOf('my-show-mask-box-amplify') > -1) {
+     domListE.addEventListener('click', function () {
       MyshowMaskAmplify *= 1.2;
-       let w1 = Number(MyshowMaskImg.offsetWidth);
-       let h1 = Number(MyshowMaskImg.offsetHeight);
-       // 计算出产生的宽度
-       let w2 = w1*1.2;
-       let h2 = h1*1.2;
-       iocSetImg(w2,w1,h2,h1)
+      let w1 = Number(MyshowMaskImg.offsetWidth);
+      let h1 = Number(MyshowMaskImg.offsetHeight);
+      // 计算出产生的宽度
+      let w2 = w1 * 1.2;
+      let h2 = h1 * 1.2;
+      iocSetImg(w2, w1, h2, h1)
      })
     }
     // 缩小图标
-    if(domListECssArr.indexOf('my-show-mask-box-reduce') > -1){
-     domListE.addEventListener('click',function(){
+    if (domListECssArr.indexOf('my-show-mask-box-reduce') > -1) {
+     domListE.addEventListener('click', function () {
       if (MyshowMaskAmplify < 100) return;
       MyshowMaskAmplify /= 1.2
-       let w1 = Number(MyshowMaskImg.offsetWidth);
-       let h1 = Number(MyshowMaskImg.offsetHeight);
-       let w2 = w1/1.2;
-       let h2 = h1/1.2;
-       iocSetImg(w2,w1,h2,h1)
+      let w1 = Number(MyshowMaskImg.offsetWidth);
+      let h1 = Number(MyshowMaskImg.offsetHeight);
+      let w2 = w1 / 1.2;
+      let h2 = h1 / 1.2;
+      iocSetImg(w2, w1, h2, h1)
+     })
+    }
+    // 还原1:1图标
+    if (domListECssArr.indexOf('my-show-mask-box-reduction') > -1) {
+     domListE.addEventListener('click', function () {
+      initImg(MyshowMaskMyurlLis[MyshowMaskMyindex])
      })
     }
     // left旋转图标
-    if(domListECssArr.indexOf('my-show-mask-box-rotate-left') > -1){
-     domListE.addEventListener('click',function(){
-       MyshowMaskRotate = MyshowMaskRotate === 0? 270 : MyshowMaskRotate - 90 ;
-       MyshowMaskImg.style.transform = `rotate(${MyshowMaskRotate}deg)`;
+    if (domListECssArr.indexOf('my-show-mask-box-rotate-left') > -1) {
+     domListE.addEventListener('click', function () {
+      MyshowMaskRotate = MyshowMaskRotate === 0 ? 270 : MyshowMaskRotate - 90;
+      MyshowMaskImg.style.transform = `rotate(${MyshowMaskRotate}deg)`;
      })
     }
     // right旋转图标
-    if(domListECssArr.indexOf('my-show-mask-box-rotate-right') > -1){
-     domListE.addEventListener('click',function(){
-       MyshowMaskRotate = MyshowMaskRotate === 360 ? 90 : MyshowMaskRotate + 90;
-       MyshowMaskImg.style.transform = `rotate(${MyshowMaskRotate}deg)`;
+    if (domListECssArr.indexOf('my-show-mask-box-rotate-right') > -1) {
+     domListE.addEventListener('click', function () {
+      MyshowMaskRotate = MyshowMaskRotate === 360 ? 90 : MyshowMaskRotate + 90;
+      MyshowMaskImg.style.transform = `rotate(${MyshowMaskRotate}deg)`;
      })
     }
    })
   }
-
-  if(cssArr.indexOf('my-show-mask-switch-right') > -1){
-   e.addEventListener('click',function(myShowMaskBox){
-     myShowMaskBox.stopPropagation()  // 阻止事件冒泡
-     MyshowMaskMyindex = MyshowMaskMyindex===(MyshowMaskMyurlLis.length-1)?0:MyshowMaskMyindex+1;
-     initImg(MyshowMaskMyurlLis[MyshowMaskMyindex])
+  // 点击切换图片
+  if (cssArr.indexOf('my-show-mask-switch-right') > -1) {
+   e.addEventListener('click', function (myShowMaskBox) {
+    myShowMaskBox.stopPropagation()  // 阻止事件冒泡
+    MyshowMaskMyindex = MyshowMaskMyindex === (MyshowMaskMyurlLis.length - 1) ? 0 : MyshowMaskMyindex + 1;
+    initImg(MyshowMaskMyurlLis[MyshowMaskMyindex])
    })
   }
-  if(cssArr.indexOf('my-show-mask-switch-left') > -1){
-   e.addEventListener('click',function(myShowMaskBox){
-     myShowMaskBox.stopPropagation()  // 阻止事件冒泡
-     MyshowMaskMyindex = MyshowMaskMyindex===0?(MyshowMaskMyurlLis.length-1):MyshowMaskMyindex-1;
-     initImg(MyshowMaskMyurlLis[MyshowMaskMyindex])
+  // 点击切换图片
+  if (cssArr.indexOf('my-show-mask-switch-left') > -1) {
+   e.addEventListener('click', function (myShowMaskBox) {
+    myShowMaskBox.stopPropagation()  // 阻止事件冒泡
+    MyshowMaskMyindex = MyshowMaskMyindex === 0 ? (MyshowMaskMyurlLis.length - 1) : MyshowMaskMyindex - 1;
+    initImg(MyshowMaskMyurlLis[MyshowMaskMyindex])
    })
   }
  })
 }
 
 // 滚轮缩放图片
-function setImg(rect1,addType,e,type) {
-  if(MyshowMaskRotate === 0 || MyshowMaskRotate === 180 || MyshowMaskRotate === 360){
-   MyshowMaskAmplify = addType==='add'?MyshowMaskAmplify + (MyshowMaskAmplify * 0.2):MyshowMaskAmplify - (MyshowMaskAmplify * 0.2);
-   MyshowMaskImg.style.width = MyshowMaskAmplify + 'px';
-   // 放大后在获取一次图片信息
-   let rect2 = MyshowMaskImg.getBoundingClientRect();
-   // 不旋转公式一，不旋转: 位置的偏移 - ((放大后的图片宽度 - 放大前的宽度) * (当前鼠标位置 / 图片的总宽度))
-   MyshowMaskImg.style.left = (rect2.left - ((rect2.width - rect1.width) * (e.clientX - rect1.left) / rect1.width)) + 'px';
-   MyshowMaskImg.style.top = (rect2.top - ((rect2.height - rect1.height) * (e.clientY - rect1.top) / rect1.height)) + 'px';
-  } else{
-  if( type === 'large' ){
+function setImg(rect1, addType, e, type) {
+ if (MyshowMaskRotate === 0 || MyshowMaskRotate === 180 || MyshowMaskRotate === 360) {
+  MyshowMaskAmplify = addType === 'add' ? MyshowMaskAmplify + (MyshowMaskAmplify * 0.2) : MyshowMaskAmplify - (MyshowMaskAmplify * 0.2);
+  MyshowMaskImg.style.width = MyshowMaskAmplify + 'px';
+  // 放大后在获取一次图片信息
+  let rect2 = MyshowMaskImg.getBoundingClientRect();
+  // 不旋转公式一，不旋转: 位置的偏移 - ((放大后的图片宽度 - 放大前的宽度) * (当前鼠标位置 / 图片的总宽度))
+  MyshowMaskImg.style.left = (rect2.left - ((rect2.width - rect1.width) * (e.clientX - rect1.left) / rect1.width)) + 'px';
+  MyshowMaskImg.style.top = (rect2.top - ((rect2.height - rect1.height) * (e.clientY - rect1.top) / rect1.height)) + 'px';
+ } else {
+  if (type === 'large') {
    // 放大
-    MyshowMaskAmplify *= 1.2;
-    let w1 = Number(MyshowMaskImg.offsetWidth);
-    let h1 = Number(MyshowMaskImg.offsetHeight);
-    // 计算出产生的宽度
-    let w2 = w1*1.2;
-    let h2 = h1*1.2;
-    verticalScaling(w2,w1,h2,h1,e,type)
-  } else{
+   MyshowMaskAmplify *= 1.2;
+   let w1 = Number(MyshowMaskImg.offsetWidth);
+   let h1 = Number(MyshowMaskImg.offsetHeight);
+   // 计算出产生的宽度
+   let w2 = w1 * 1.2;
+   let h2 = h1 * 1.2;
+   verticalScaling(w2, w1, h2, h1, e, type)
+  } else {
    // 缩小
    if (MyshowMaskAmplify < 100) return;
-    MyshowMaskAmplify /= 1.2
-    let w1 = Number(MyshowMaskImg.offsetWidth);
-    let h1 = Number(MyshowMaskImg.offsetHeight);
-    let w2 = w1/1.2;
-    let h2 = h1/1.2;
-    verticalScaling(w2,w1,h2,h1,e)
+   MyshowMaskAmplify /= 1.2
+   let w1 = Number(MyshowMaskImg.offsetWidth);
+   let h1 = Number(MyshowMaskImg.offsetHeight);
+   let w2 = w1 / 1.2;
+   let h2 = h1 / 1.2;
+   verticalScaling(w2, w1, h2, h1, e)
   }
  }
 }
 
 // 图标缩放图片
 let timerAmplify = null;
-function iocSetImg(w2,w1,h2,h1) {
+function iocSetImg(w2, w1, h2, h1) {
  MyshowMaskImg.style.transition = 'all .3s';
  MyshowMaskImg.style.width = `${(MyshowMaskAmplify)}px`;
- MyshowMaskImg.style.left = Number(MyshowMaskImg.style.left.replaceAll('px',''))-((w2-w1)*0.5) + 'px';
- MyshowMaskImg.style.top = Number(MyshowMaskImg.style.top.replaceAll('px',''))-((h2-h1)*0.5) + 'px';
+ MyshowMaskImg.style.left = Number(MyshowMaskImg.style.left.replaceAll('px', '')) - ((w2 - w1) * 0.5) + 'px';
+ MyshowMaskImg.style.top = Number(MyshowMaskImg.style.top.replaceAll('px', '')) - ((h2 - h1) * 0.5) + 'px';
  clearTimeout(timerAmplify)
  timerAmplify = setTimeout(() => {
   MyshowMaskImg.style.transition = 'none';
  }, 300);
 }
 // 竖向缩放
-function verticalScaling(w2,w1,h2,h1,e,t) {
+function verticalScaling(w2, w1, h2, h1, e, t) {
  let h = Number(e.target.offsetHeight); // 放大缩小前的高度
  let w = Number(e.target.offsetWidth); // 放大缩小前的高度
  MyshowMaskImg.style.width = `${(MyshowMaskAmplify)}px`;
  let boxHeight = e.target.offsetHeight;  // 放大缩小后的高度
  let boxWidth = e.target.offsetWidth;    // 放大缩小后的宽度
- let left = Number(MyshowMaskImg.style.left.replaceAll('px','')); //  当前的box的left值
- let top = Number(MyshowMaskImg.style.top.replaceAll('px',''));   // 当前的box的top值
+ let left = Number(MyshowMaskImg.style.left.replaceAll('px', '')); //  当前的box的left值
+ let top = Number(MyshowMaskImg.style.top.replaceAll('px', ''));   // 当前的box的top值
 
 
-  // x轴 percentageLeft
-  // 需要先计算出正确的鼠标位置，鼠标位置需要先根据 正放的形状来计算
-  // 正确的鼠标位置 ： 计算
-  // 对于横向计算： 需要知道多余的部分是剩余隐藏起来的部分，无法计算到，但是需要吧横向的宽度算出来：
-  // 隐藏的部分多余 等于高的一般进去宽的一半，需要模拟出鼠标位置
-  // 先算横着的位置：  当前鼠标位置等于 隐藏的部分 加上 当前鼠标位置距离右边的位置
-  let  percentageLeft,percentageTop;
-  // y轴 percentageTop
-  
-  // 计算公式
-  //  x 轴的的公式 ： 
-  // 竖向的鼠标位置 + (放大后的宽度 / 2 - 放大后的高度 / 2) = 先算出隐藏的位置宽度在加上鼠标位置等于= 原形状的鼠标位置 / 放大前的宽度
-  // (放大后的宽度 / 2 - 放大后的高度 / 2) = 阴影宽度
+ // x轴 percentageLeft
+ // 需要先计算出正确的鼠标位置，鼠标位置需要先根据 正放的形状来计算
+ // 正确的鼠标位置 ： 计算
+ // 对于横向计算： 需要知道多余的部分是剩余隐藏起来的部分，无法计算到，但是需要吧横向的宽度算出来：
+ // 隐藏的部分多余 等于高的一般进去宽的一半，需要模拟出鼠标位置
+ // 先算横着的位置：  当前鼠标位置等于 隐藏的部分 加上 当前鼠标位置距离右边的位置
+ let percentageLeft, percentageTop;
+ // y轴 percentageTop
 
-  // y 轴的的公式 ： 
-  // ((放大后的宽度 - 横向的鼠标位置) + (放大后的高度 /2 - 放大后的宽度/2)) / h
-  // =  放大后宽度 - 鼠标位置 = 剩余的宽度 = 原形状的top 值
-  // =  放大后的高度 / 2 - 放大后的宽度 / 2  =  阴影高度
-  // = 原形状的top 值 + 阴影高度 / 旧的高度 等于当前鼠标的位置位置
-  
-  if(MyshowMaskRotate != 90 ){
-   percentageLeft = (e.offsetY + (boxWidth / 2 - boxHeight/2)) / w;
-   percentageTop = ((boxWidth - e.offsetX) + (boxHeight/2 - boxWidth/2)) / h;
-  } else{
-   // 需要把基本位置重置  计算位置在左下角 为 x：0 y：0
-   let y = boxHeight-e.offsetY
-   let x = boxWidth-e.offsetX
-   percentageLeft = (y + (boxWidth/2 - boxHeight/2)) / w;
-   percentageTop = ((boxWidth - x) + (boxHeight/2 - boxWidth/2)) / h;
-  }
+ // 计算公式
+ //  x 轴的的公式 ： 
+ // 竖向的鼠标位置 + (放大后的宽度 / 2 - 放大后的高度 / 2) = 先算出隐藏的位置宽度在加上鼠标位置等于= 原形状的鼠标位置 / 放大前的宽度
+ // (放大后的宽度 / 2 - 放大后的高度 / 2) = 阴影宽度
+
+ // y 轴的的公式 ： 
+ // ((放大后的宽度 - 横向的鼠标位置) + (放大后的高度 /2 - 放大后的宽度/2)) / h
+ // =  放大后宽度 - 鼠标位置 = 剩余的宽度 = 原形状的top 值
+ // =  放大后的高度 / 2 - 放大后的宽度 / 2  =  阴影高度
+ // = 原形状的top 值 + 阴影高度 / 旧的高度 等于当前鼠标的位置位置
+
+ if (MyshowMaskRotate != 90) {
+  percentageLeft = (e.offsetY + (boxWidth / 2 - boxHeight / 2)) / w;
+  percentageTop = ((boxWidth - e.offsetX) + (boxHeight / 2 - boxWidth / 2)) / h;
+ } else {
+  // 需要把基本位置重置  计算位置在左下角 为 x：0 y：0
+  let y = boxHeight - e.offsetY
+  let x = boxWidth - e.offsetX
+  percentageLeft = (y + (boxWidth / 2 - boxHeight / 2)) / w;
+  percentageTop = ((boxWidth - x) + (boxHeight / 2 - boxWidth / 2)) / h;
+ }
 
 
-  MyshowMaskImg.style.left = left - ((w2-w1) * (percentageLeft)) + 'px';
-  MyshowMaskImg.style.top = top - ((h2-h1) * (percentageTop)) + 'px';
+ MyshowMaskImg.style.left = left - ((w2 - w1) * (percentageLeft)) + 'px';
+ MyshowMaskImg.style.top = top - ((h2 - h1) * (percentageTop)) + 'px';
 }
 
 
-function divRemove(){
+function divRemove() {
  // 清除防止滚动
  window.removeEventListener('wheel', preventScroll)
  MyshowMaskDiv.remove()
 }
 
 // 生成图片
-function initImg(url){
+function initImg(url) {
  MyshowMaskAmplify = 10;
  MyshowMaskRotate = 0;
  MyshowMaskSetCursorTimer = null;
  let myShowMaskImg = document.getElementById('my-show-mask-img')
- if(myShowMaskImg){
+ if (myShowMaskImg) {
   myShowMaskImg.remove()
  }
  MyshowMaskImg = document.createElement('img');
@@ -244,7 +251,7 @@ function initImg(url){
   MyshowMaskImg.style.left = MyshowMaskImg.offsetLeft + 'px';
   // 图片拖拽
   MyshowMaskImg.addEventListener('mousedown', function (e) {
-   if(MyshowMaskSetCursorTimer){
+   if (MyshowMaskSetCursorTimer) {
     clearTimeout(MyshowMaskSetCursorTimer)
    }
    MyshowMaskImg.style.cursor = 'grabbing';
@@ -268,22 +275,22 @@ function initImg(url){
    let rect1 = MyshowMaskImg.getBoundingClientRect();
    if (e.deltaY < 0) {
     // 放大宽度，并且定位指定的位置
-    setImg(rect1,'add',e,'large')
+    setImg(rect1, 'add', e, 'large')
     clearTimeout(MyshowMaskSetCursorTimer)
     MyshowMaskImg.style.cursor = 'zoom-in'
-    MyshowMaskSetCursorTimer = setTimeout(()=>{
+    MyshowMaskSetCursorTimer = setTimeout(() => {
      MyshowMaskImg.style.cursor = 'grab'
-    },500)
+    }, 500)
    }
    if (e.deltaY > 0) {
     if (MyshowMaskAmplify < 100) return;
     // 缩小
-    setImg(rect1,'reduce',e,'small')
+    setImg(rect1, 'reduce', e, 'small')
     MyshowMaskImg.style.cursor = 'zoom-out'
     clearTimeout(MyshowMaskSetCursorTimer)
-    MyshowMaskSetCursorTimer = setTimeout(()=>{
+    MyshowMaskSetCursorTimer = setTimeout(() => {
      MyshowMaskImg.style.cursor = 'grab'
-    },500)
+    }, 500)
    }
    // 清除浏览器默认行为，---可能会造成滚动页面 
    e.preventDefault();
@@ -293,7 +300,7 @@ function initImg(url){
 // 生成旋转，放大缩小图标
 function setIco() {
  return (
- `
+  `
   <style>
     .my-show-mask-close{
       position: absolute;
@@ -331,67 +338,27 @@ function setIco() {
       display: flex;
     }
     .my-show-mask-box>.my-show-mask-box-reduce{
-     padding-top: 5px;
+     padding-top: 3px;
     }
     .my-show-mask-box>.my-show-mask-box-amplify{
-     padding-top: 5px;
+     padding-top: 3px;
+    }
+    .my-show-mask-box>.my-show-mask-box-reduction{
+     padding-top: 2px;
     }
     .my-show-mask-box>.my-show-mask-box-rotate-left{
-     border-radius: 50%;
      position: relative;
-     width: 20px;
-     height: 20px;
-     border: 2px solid #fff;
-    }
-    .my-show-mask-box>.my-show-mask-box-rotate-left::after{
-     content: '';
-     position: absolute;
-     z-index: 2;
-     transform: rotate(65deg);
-     left: -3px;
-     top: -1px;
-     border-right: 2px solid #fff;
-     width: 5px;
-     height: 5px;
-     border-bottom: 2px solid #fff;
-    }
-    .my-show-mask-box>.my-show-mask-box-rotate-left::before{
-     content: '';
-     position: absolute;
-     width: 12px;
-     height: 7px;
-     top: 5px;
-     left: -6px;
-     background-color: #606266;
+     padding-top: 1px;
+     width: 23px;
+     height: 23px;
     }
 
     .my-show-mask-box>.my-show-mask-box-rotate-right{
-     border-radius: 50%;
      position: relative;
-     width: 20px;
-     height: 20px;
-     border: 2px solid #fff;
-    }
-    .my-show-mask-box>.my-show-mask-box-rotate-right::after{
-     content: '';
-     position: absolute;
-     z-index: 2;
-     transform: rotate(19deg);
-     right: -3px;
-     top: 0px;
-     border-right: 2px solid #fff;
-     width: 5px;
-     height: 5px;
-     border-bottom: 2px solid #fff;
-    }
-    .my-show-mask-box>.my-show-mask-box-rotate-right::before{
-     content: '';
-     position: absolute;
-     width: 12px;
-     height: 7px;
-     top: 5px;
-     right: -6px;
-     background-color: #606266;
+     padding-top: 1px;
+     transform: rotateY(180deg);
+     width: 23px;
+     height: 23px;
     }
     .my-show-mask-switch{
      position: absolute;
@@ -472,9 +439,19 @@ function setIco() {
       <line x1="16" y1="17" x2="20" y2="20" stroke="white" stroke-width="2" />
     </svg>
    </div>
-   <div class='my-show-mask-box-rotate-left'>
+
+   <div class="my-show-mask-box-reduction">
+   <svg t="1700634179030" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11099" width="25" height="25"><path d="M316 672h60c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v304c0 4.4 3.6 8 8 8zM512 622c22.1 0 40-17.9 40-39 0-23.1-17.9-41-40-41s-40 17.9-40 41c0 21.1 17.9 39 40 39zM512 482c22.1 0 40-17.9 40-39 0-23.1-17.9-41-40-41s-40 17.9-40 41c0 21.1 17.9 39 40 39z" p-id="11100" fill="#ffffff"></path><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32z m-40 728H184V184h656v656z" p-id="11101" fill="#ffffff"></path><path d="M648 672h60c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v304c0 4.4 3.6 8 8 8z" p-id="11102" fill="#ffffff"></path></svg>
    </div>
+
+
+
+   <div class='my-show-mask-box-rotate-left'>
+   <svg t="1700632794728" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5964" width="23" height="23"><path d="M930.909091 344.436364c-41.890909-111.709091-130.327273-209.454545-242.036364-256-102.4-51.2-232.727273-51.2-349.090909-9.309091-74.472727 27.927273-134.981818 69.818182-186.181818 121.018182l-9.309091 13.963636V93.090909c0-23.272727-13.963636-41.890909-41.890909-41.890909-27.927273 0-41.890909 18.618182-41.890909 41.890909v251.345455c0 23.272727 13.963636 41.890909 41.890909 41.890909h251.345455c23.272727 0 41.890909-13.963636 41.890909-41.890909 0-23.272727-13.963636-41.890909-41.890909-41.890909H186.181818l9.309091-9.309091c41.890909-60.509091 97.745455-107.054545 167.563636-134.981819 88.436364-37.236364 195.490909-32.581818 288.581819 9.309091 88.436364 41.890909 158.254545 111.709091 195.490909 204.8 37.236364 93.090909 37.236364 200.145455-4.654546 293.236364-41.890909 88.436364-111.709091 158.254545-204.8 195.490909-88.436364 37.236364-195.490909 32.581818-288.581818-9.309091-88.436364-41.890909-158.254545-111.709091-195.490909-204.8-4.654545-13.963636-23.272727-27.927273-37.236364-27.927273-4.654545 0-9.309091 0-18.618181 4.654546s-18.618182 13.963636-23.272728 23.272727c-4.654545 9.309091-4.654545 23.272727 0 32.581818 41.890909 111.709091 130.327273 209.454545 242.036364 256 60.509091 27.927273 125.672727 41.890909 190.836364 41.890909 55.854545 0 116.363636-9.309091 162.90909-27.927272 111.709091-41.890909 209.454545-130.327273 256-242.036364 41.890909-125.672727 46.545455-251.345455 4.654546-363.054545z" fill="#ffffff" p-id="5965"></path></svg>
+   </div>
+   
    <div class='my-show-mask-box-rotate-right'>
+   <svg t="1700632794728" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5964" width="23" height="23"><path d="M930.909091 344.436364c-41.890909-111.709091-130.327273-209.454545-242.036364-256-102.4-51.2-232.727273-51.2-349.090909-9.309091-74.472727 27.927273-134.981818 69.818182-186.181818 121.018182l-9.309091 13.963636V93.090909c0-23.272727-13.963636-41.890909-41.890909-41.890909-27.927273 0-41.890909 18.618182-41.890909 41.890909v251.345455c0 23.272727 13.963636 41.890909 41.890909 41.890909h251.345455c23.272727 0 41.890909-13.963636 41.890909-41.890909 0-23.272727-13.963636-41.890909-41.890909-41.890909H186.181818l9.309091-9.309091c41.890909-60.509091 97.745455-107.054545 167.563636-134.981819 88.436364-37.236364 195.490909-32.581818 288.581819 9.309091 88.436364 41.890909 158.254545 111.709091 195.490909 204.8 37.236364 93.090909 37.236364 200.145455-4.654546 293.236364-41.890909 88.436364-111.709091 158.254545-204.8 195.490909-88.436364 37.236364-195.490909 32.581818-288.581818-9.309091-88.436364-41.890909-158.254545-111.709091-195.490909-204.8-4.654545-13.963636-23.272727-27.927273-37.236364-27.927273-4.654545 0-9.309091 0-18.618181 4.654546s-18.618182 13.963636-23.272728 23.272727c-4.654545 9.309091-4.654545 23.272727 0 32.581818 41.890909 111.709091 130.327273 209.454545 242.036364 256 60.509091 27.927273 125.672727 41.890909 190.836364 41.890909 55.854545 0 116.363636-9.309091 162.90909-27.927272 111.709091-41.890909 209.454545-130.327273 256-242.036364 41.890909-125.672727 46.545455-251.345455 4.654546-363.054545z" fill="#ffffff" p-id="5965"></path></svg>
    </div>
   </div>
  `
@@ -483,23 +460,23 @@ function setIco() {
 
 // 防止滚动
 function preventScroll(e) {
-  e.preventDefault()
+ e.preventDefault()
 }
-function geyAllDomMaxZindex(){
+function geyAllDomMaxZindex() {
  // 获取页面上所有元素
-var allElements = document.querySelectorAll('*');
-// 初始化最高z-index值为一个较小的负数
-var highestZIndex = -1;
-// 遍历所有元素
-allElements.forEach(function(element) {
+ var allElements = document.querySelectorAll('*');
+ // 初始化最高z-index值为一个较小的负数
+ var highestZIndex = -1;
+ // 遍历所有元素
+ allElements.forEach(function (element) {
   // 获取当前元素的z-index属性
   var zIndex = window.getComputedStyle(element).getPropertyValue('z-index');
   // 将z-index属性的值转换为整数
   zIndex = parseInt(zIndex, 10);
   // 检查z-index是否有效且比当前最高值高
   if (!isNaN(zIndex) && zIndex > highestZIndex) {
-    highestZIndex = zIndex;
+   highestZIndex = zIndex;
   }
-});
-return highestZIndex
+ });
+ return highestZIndex
 }

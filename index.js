@@ -1,3 +1,4 @@
+import {iswap} from './utils.js'
 // 初始大小
 let MyshowMaskAmplify = 10;
 let MyshowMaskRotate = 0;
@@ -5,6 +6,7 @@ let MyshowMaskDiv, MyshowMaskImg;
 let MyshowMaskMyurlLis = []
 let MyshowMaskMyindex = 0;
 let MyshowMaskSetCursorTimer = null;
+let myThrottle = throttle(touchmoveSetImg,50);  // 节流 只能被调用一次
 export function showMask(urlList, index = 0) {
  // 创建遮罩元素
  MyshowMaskDiv = document.createElement('div');
@@ -26,7 +28,6 @@ export function showMask(urlList, index = 0) {
  // 初始化
  MyshowMaskAmplify = 10;
  MyshowMaskRotate = 0;
- MyshowMaskMyindex = 0;
  MyshowMaskMyurlLis = urlList
  MyshowMaskMyindex = index
  initImg(urlList[index])
@@ -51,25 +52,14 @@ export function showMask(urlList, index = 0) {
     // 放大图标
     if (domListECssArr.indexOf('my-show-mask-box-amplify') > -1) {
      domListE.addEventListener('click', function () {
-      MyshowMaskAmplify *= 1.2;
-      let w1 = Number(MyshowMaskImg.offsetWidth);
-      let h1 = Number(MyshowMaskImg.offsetHeight);
-      // 计算出产生的宽度
-      let w2 = w1 * 1.2;
-      let h2 = h1 * 1.2;
-      iocSetImg(w2, w1, h2, h1)
+      touchmoveSetImg(true)
      })
     }
     // 缩小图标
     if (domListECssArr.indexOf('my-show-mask-box-reduce') > -1) {
      domListE.addEventListener('click', function () {
       if (MyshowMaskAmplify < 100) return;
-      MyshowMaskAmplify /= 1.2
-      let w1 = Number(MyshowMaskImg.offsetWidth);
-      let h1 = Number(MyshowMaskImg.offsetHeight);
-      let w2 = w1 / 1.2;
-      let h2 = h1 / 1.2;
-      iocSetImg(w2, w1, h2, h1)
+      touchmoveSetImg(false)
      })
     }
     // 还原1:1图标
@@ -112,7 +102,6 @@ export function showMask(urlList, index = 0) {
   }
  })
 }
-
 // 滚轮缩放图片
 function setImg(rect1, addType, e, type) {
  if (MyshowMaskRotate === 0 || MyshowMaskRotate === 180 || MyshowMaskRotate === 360) {
@@ -145,11 +134,10 @@ function setImg(rect1, addType, e, type) {
   }
  }
 }
-
 // 图标缩放图片
 let timerAmplify = null;
-function iocSetImg(w2, w1, h2, h1) {
- MyshowMaskImg.style.transition = 'all .3s';
+function iocSetImg(w2, w1, h2, h1, delay) {
+ MyshowMaskImg.style.transition = `all ${delay}s linear`;
  MyshowMaskImg.style.width = `${(MyshowMaskAmplify)}px`;
  MyshowMaskImg.style.left = Number(MyshowMaskImg.style.left.replaceAll('px', '')) - ((w2 - w1) * 0.5) + 'px';
  MyshowMaskImg.style.top = Number(MyshowMaskImg.style.top.replaceAll('px', '')) - ((h2 - h1) * 0.5) + 'px';
@@ -204,14 +192,11 @@ function verticalScaling(w2, w1, h2, h1, e, t) {
  MyshowMaskImg.style.left = left - ((w2 - w1) * (percentageLeft)) + 'px';
  MyshowMaskImg.style.top = top - ((h2 - h1) * (percentageTop)) + 'px';
 }
-
-
+// 清除防止滚动
 function divRemove() {
- // 清除防止滚动
  window.removeEventListener('wheel', preventScroll)
  MyshowMaskDiv.remove()
 }
-
 // 生成图片
 function initImg(url) {
  MyshowMaskAmplify = 10;
@@ -249,52 +234,129 @@ function initImg(url) {
   // 设置默认值 以便放大的时候根据放大的宽度计算位置
   MyshowMaskImg.style.top = MyshowMaskImg.offsetTop + 'px';
   MyshowMaskImg.style.left = MyshowMaskImg.offsetLeft + 'px';
-  // 图片拖拽
-  MyshowMaskImg.addEventListener('mousedown', function (e) {
-   if (MyshowMaskSetCursorTimer) {
-    clearTimeout(MyshowMaskSetCursorTimer)
-   }
-   MyshowMaskImg.style.cursor = 'grabbing';
-   let x = e.pageX - MyshowMaskImg.offsetLeft;
-   let y = e.pageY - MyshowMaskImg.offsetTop;
-   window.onmousemove = function (e) {
-    let cx = e.pageX - x;
-    let cy = e.pageY - y;
-    MyshowMaskImg.style.top = cy + 'px';
-    MyshowMaskImg.style.left = cx + 'px';
-   }
-   window.onmouseup = function (e) {
-    MyshowMaskImg.style.cursor = 'grab';
-    window.onmousemove = null;
-    window.onmouseup = null;
-   }
-  })
+  
+
+  // #region 图片拖拽功能 开始
+  if(iswap() === 'pc'){
+    MyshowMaskImg.addEventListener('mousedown', function (e) {
+      if (MyshowMaskSetCursorTimer) {
+       clearTimeout(MyshowMaskSetCursorTimer)
+      }
+      MyshowMaskImg.style.cursor = 'grabbing';
+      let x = e.pageX - MyshowMaskImg.offsetLeft;
+      let y = e.pageY - MyshowMaskImg.offsetTop;
+      window.onmousemove = function (e) {
+       let cx = e.pageX - x;
+       let cy = e.pageY - y;
+       MyshowMaskImg.style.top = cy + 'px';
+       MyshowMaskImg.style.left = cx + 'px';
+      }
+      window.onmouseup = function (e) {
+       MyshowMaskImg.style.cursor = 'grab';
+       window.onmousemove = null;
+       window.onmouseup = null;
+      }
+     })
+  }
+  // 移动端
+  let start = false;   // 控制缩放
+  if(iswap() === 'phone'){
+    let isDragging = false;
+    let offsetX, offsetY;
+    // 触摸开始
+    MyshowMaskImg.addEventListener('touchstart', function (e) {
+      const touch = e.touches[0];
+      offsetX = touch.clientX - MyshowMaskImg.getBoundingClientRect().left;
+      offsetY = touch.clientY - MyshowMaskImg.getBoundingClientRect().top;
+      isDragging = true;
+    });
+    // 触摸移动
+    MyshowMaskImg.addEventListener('touchmove', function (e) {
+      if (isDragging && !start) {
+        const touch = e.touches[0];
+        const newX = touch.clientX - offsetX;
+        const newY = touch.clientY - offsetY;
+        // 更新元素位置
+        MyshowMaskImg.style.left = `${newX}px`;
+        MyshowMaskImg.style.top = `${newY}px`;
+      }
+    });
+    // 触摸结束
+    MyshowMaskImg.addEventListener('touchend', function () {
+      isDragging = false;
+    });
+  }
+  // #endregion 
+
+  // #region 双指缩放--事件
+  if(iswap() === 'phone'){
+    // 监听触摸开始事件
+    let initialDistance = 0;  // 双指的距离位置
+    MyshowMaskDiv.addEventListener('touchstart', function (e) {
+      const touches = e.touches;
+      if (touches.length === 2) {
+        start = true;
+        initialDistance = Math.hypot(
+          touches[0].pageX - touches[1].pageX,
+          touches[0].pageY - touches[1].pageY
+        );
+      }
+    });
+
+    // 监听触摸移动事件
+    MyshowMaskDiv.addEventListener('touchmove', function (e) {
+      const touches = e.touches;
+      if (touches.length === 2 && start) {
+        const currentDistance = Math.hypot(
+          touches[0].pageX - touches[1].pageX,
+          touches[0].pageY - touches[1].pageY
+        );
+        // 判断是放大还是缩小
+        if (currentDistance > initialDistance) {
+          myThrottle(true)
+        } else {
+          myThrottle(false)
+        }
+        initialDistance = currentDistance;
+      }
+    });
+
+    // 监听触摸结束事件
+    MyshowMaskDiv.addEventListener('touchend', function () {
+      start = false;
+      initialDistance=0;
+    });
+  }
+  // 手势控制图片放大还是缩小
   // 添加滚轮放大缩小
-  MyshowMaskImg.addEventListener('wheel', function (e) {
-   // 获取图片信息
-   let rect1 = MyshowMaskImg.getBoundingClientRect();
-   if (e.deltaY < 0) {
-    // 放大宽度，并且定位指定的位置
-    setImg(rect1, 'add', e, 'large')
-    clearTimeout(MyshowMaskSetCursorTimer)
-    MyshowMaskImg.style.cursor = 'zoom-in'
-    MyshowMaskSetCursorTimer = setTimeout(() => {
-     MyshowMaskImg.style.cursor = 'grab'
-    }, 500)
-   }
-   if (e.deltaY > 0) {
-    if (MyshowMaskAmplify < 100) return;
-    // 缩小
-    setImg(rect1, 'reduce', e, 'small')
-    MyshowMaskImg.style.cursor = 'zoom-out'
-    clearTimeout(MyshowMaskSetCursorTimer)
-    MyshowMaskSetCursorTimer = setTimeout(() => {
-     MyshowMaskImg.style.cursor = 'grab'
-    }, 500)
-   }
-   // 清除浏览器默认行为，---可能会造成滚动页面 
-   e.preventDefault();
-  })
+  if(iswap() === 'pc'){
+    MyshowMaskImg.addEventListener('wheel', function (e) {
+      // 获取图片信息
+      let rect1 = MyshowMaskImg.getBoundingClientRect();
+      if (e.deltaY < 0) {
+       // 放大宽度，并且定位指定的位置
+       setImg(rect1, 'add', e, 'large')
+       clearTimeout(MyshowMaskSetCursorTimer)
+       MyshowMaskImg.style.cursor = 'zoom-in'
+       MyshowMaskSetCursorTimer = setTimeout(() => {
+        MyshowMaskImg.style.cursor = 'grab'
+       }, 500)
+      }
+      if (e.deltaY > 0) {
+       if (MyshowMaskAmplify < 100) return;
+       // 缩小
+       setImg(rect1, 'reduce', e, 'small')
+       MyshowMaskImg.style.cursor = 'zoom-out'
+       clearTimeout(MyshowMaskSetCursorTimer)
+       MyshowMaskSetCursorTimer = setTimeout(() => {
+        MyshowMaskImg.style.cursor = 'grab'
+       }, 500)
+      }
+      // 清除浏览器默认行为，---可能会造成滚动页面 
+      e.preventDefault();
+     })
+  }
+  // #endregion 
  })
 }
 // 生成旋转，放大缩小图标
@@ -432,20 +494,20 @@ function setIco() {
     </svg>
    </div>
 
-   <div class="my-show-mask-box-reduce">
-    <svg width="23" height="23" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="10" cy="10" r="9" stroke="white" fill="none" stroke-width="2" />
-      <line x1="6" y1="10" x2="14" y2="10" stroke="white" stroke-width="2" />
-      <line x1="16" y1="17" x2="20" y2="20" stroke="white" stroke-width="2" />
-    </svg>
-   </div>
+   ${iswap() === 'pc'?`<div class="my-show-mask-box-reduce">
+   <svg width="23" height="23" xmlns="http://www.w3.org/2000/svg">
+     <circle cx="10" cy="10" r="9" stroke="white" fill="none" stroke-width="2" />
+     <line x1="6" y1="10" x2="14" y2="10" stroke="white" stroke-width="2" />
+     <line x1="16" y1="17" x2="20" y2="20" stroke="white" stroke-width="2" />
+   </svg>
+  </div>`:``}
 
-   <div class="my-show-mask-box-reduction">
+  <div class="my-show-mask-box-reduction">
    <svg t="1700634179030" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11099" width="25" height="25"><path d="M316 672h60c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v304c0 4.4 3.6 8 8 8zM512 622c22.1 0 40-17.9 40-39 0-23.1-17.9-41-40-41s-40 17.9-40 41c0 21.1 17.9 39 40 39zM512 482c22.1 0 40-17.9 40-39 0-23.1-17.9-41-40-41s-40 17.9-40 41c0 21.1 17.9 39 40 39z" p-id="11100" fill="#ffffff"></path><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32z m-40 728H184V184h656v656z" p-id="11101" fill="#ffffff"></path><path d="M648 672h60c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v304c0 4.4 3.6 8 8 8z" p-id="11102" fill="#ffffff"></path></svg>
    </div>
 
 
-
+   ${iswap() === 'pc'?`
    <div class='my-show-mask-box-rotate-left'>
    <svg t="1700632794728" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5964" width="23" height="23"><path d="M930.909091 344.436364c-41.890909-111.709091-130.327273-209.454545-242.036364-256-102.4-51.2-232.727273-51.2-349.090909-9.309091-74.472727 27.927273-134.981818 69.818182-186.181818 121.018182l-9.309091 13.963636V93.090909c0-23.272727-13.963636-41.890909-41.890909-41.890909-27.927273 0-41.890909 18.618182-41.890909 41.890909v251.345455c0 23.272727 13.963636 41.890909 41.890909 41.890909h251.345455c23.272727 0 41.890909-13.963636 41.890909-41.890909 0-23.272727-13.963636-41.890909-41.890909-41.890909H186.181818l9.309091-9.309091c41.890909-60.509091 97.745455-107.054545 167.563636-134.981819 88.436364-37.236364 195.490909-32.581818 288.581819 9.309091 88.436364 41.890909 158.254545 111.709091 195.490909 204.8 37.236364 93.090909 37.236364 200.145455-4.654546 293.236364-41.890909 88.436364-111.709091 158.254545-204.8 195.490909-88.436364 37.236364-195.490909 32.581818-288.581818-9.309091-88.436364-41.890909-158.254545-111.709091-195.490909-204.8-4.654545-13.963636-23.272727-27.927273-37.236364-27.927273-4.654545 0-9.309091 0-18.618181 4.654546s-18.618182 13.963636-23.272728 23.272727c-4.654545 9.309091-4.654545 23.272727 0 32.581818 41.890909 111.709091 130.327273 209.454545 242.036364 256 60.509091 27.927273 125.672727 41.890909 190.836364 41.890909 55.854545 0 116.363636-9.309091 162.90909-27.927272 111.709091-41.890909 209.454545-130.327273 256-242.036364 41.890909-125.672727 46.545455-251.345455 4.654546-363.054545z" fill="#ffffff" p-id="5965"></path></svg>
    </div>
@@ -453,15 +515,25 @@ function setIco() {
    <div class='my-show-mask-box-rotate-right'>
    <svg t="1700632794728" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5964" width="23" height="23"><path d="M930.909091 344.436364c-41.890909-111.709091-130.327273-209.454545-242.036364-256-102.4-51.2-232.727273-51.2-349.090909-9.309091-74.472727 27.927273-134.981818 69.818182-186.181818 121.018182l-9.309091 13.963636V93.090909c0-23.272727-13.963636-41.890909-41.890909-41.890909-27.927273 0-41.890909 18.618182-41.890909 41.890909v251.345455c0 23.272727 13.963636 41.890909 41.890909 41.890909h251.345455c23.272727 0 41.890909-13.963636 41.890909-41.890909 0-23.272727-13.963636-41.890909-41.890909-41.890909H186.181818l9.309091-9.309091c41.890909-60.509091 97.745455-107.054545 167.563636-134.981819 88.436364-37.236364 195.490909-32.581818 288.581819 9.309091 88.436364 41.890909 158.254545 111.709091 195.490909 204.8 37.236364 93.090909 37.236364 200.145455-4.654546 293.236364-41.890909 88.436364-111.709091 158.254545-204.8 195.490909-88.436364 37.236364-195.490909 32.581818-288.581818-9.309091-88.436364-41.890909-158.254545-111.709091-195.490909-204.8-4.654545-13.963636-23.272727-27.927273-37.236364-27.927273-4.654545 0-9.309091 0-18.618181 4.654546s-18.618182 13.963636-23.272728 23.272727c-4.654545 9.309091-4.654545 23.272727 0 32.581818 41.890909 111.709091 130.327273 209.454545 242.036364 256 60.509091 27.927273 125.672727 41.890909 190.836364 41.890909 55.854545 0 116.363636-9.309091 162.90909-27.927272 111.709091-41.890909 209.454545-130.327273 256-242.036364 41.890909-125.672727 46.545455-251.345455 4.654546-363.054545z" fill="#ffffff" p-id="5965"></path></svg>
    </div>
+   `:`
+   <div class="my-show-mask-box-reduce">
+   <svg width="23" height="23" xmlns="http://www.w3.org/2000/svg">
+     <circle cx="10" cy="10" r="9" stroke="white" fill="none" stroke-width="2" />
+     <line x1="6" y1="10" x2="14" y2="10" stroke="white" stroke-width="2" />
+     <line x1="16" y1="17" x2="20" y2="20" stroke="white" stroke-width="2" />
+   </svg>
+  </div>
+  `}
+   
   </div>
  `
  )
 }
-
 // 防止滚动
 function preventScroll(e) {
  e.preventDefault()
 }
+// 获取页面的 层级
 function geyAllDomMaxZindex() {
  // 获取页面上所有元素
  var allElements = document.querySelectorAll('*');
@@ -479,4 +551,38 @@ function geyAllDomMaxZindex() {
   }
  });
  return highestZIndex
+}
+// 放大或者缩小
+function touchmoveSetImg(is,delay=0.3){
+  if(is){
+    // 放大
+    MyshowMaskAmplify *= 1.2;
+    let w1 = Number(MyshowMaskImg.offsetWidth);
+    let h1 = Number(MyshowMaskImg.offsetHeight);
+    // 计算出产生的宽度
+    let w2 = w1 * 1.2;
+    let h2 = h1 * 1.2;
+    iocSetImg(w2, w1, h2, h1,delay)
+  } else{
+    // 缩小
+    if (MyshowMaskAmplify < 100) return;
+    MyshowMaskAmplify /= 1.2
+    let w1 = Number(MyshowMaskImg.offsetWidth);
+    let h1 = Number(MyshowMaskImg.offsetHeight);
+    let w2 = w1 / 1.2;
+    let h2 = h1 / 1.2;
+    iocSetImg(w2, w1, h2, h1,delay)
+  }
+}
+// 节流
+function throttle(func, delay) {
+  let lastTime = 0;
+  return function (...args) {
+    const now = Date.now();
+    
+    if (now - lastTime >= delay) {
+      func.apply(this, args);
+      lastTime = now;
+    }
+  };
 }

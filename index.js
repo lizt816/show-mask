@@ -1,4 +1,3 @@
-import {iswap} from './utils.js'
 // 初始大小
 let MyshowMaskAmplify = 10;
 let MyshowMaskRotate = 0;
@@ -6,7 +5,7 @@ let MyshowMaskDiv, MyshowMaskImg;
 let MyshowMaskMyurlLis = []
 let MyshowMaskMyindex = 0;
 let MyshowMaskSetCursorTimer = null;
-let myThrottle = throttle(touchmoveSetImg,50);  // 节流 只能被调用一次
+let myThrottle = throttle(touchmoveSetImg,100);  // 节流 只能被调用一次
 export function showMask(urlList, index = 0) {
  // 创建遮罩元素
  MyshowMaskDiv = document.createElement('div');
@@ -22,6 +21,8 @@ export function showMask(urlList, index = 0) {
  MyshowMaskDiv.style.alignItems = 'center';
  MyshowMaskDiv.style.justifyContent = 'center';
  MyshowMaskDiv.style.backgroundColor = '#00000080';
+ MyshowMaskDiv.style.touchAction = 'none';
+ 
  window.addEventListener('wheel', preventScroll, {
   passive: false
  })
@@ -313,9 +314,9 @@ function initImg(url) {
         );
         // 判断是放大还是缩小
         if (currentDistance > initialDistance) {
-          myThrottle(true)
+          myThrottle(true,0.1)  // 动画时间和节流事件相等
         } else {
-          myThrottle(false)
+          myThrottle(false,0.1)  // 动画时间和节流事件相等
         }
         initialDistance = currentDistance;
       }
@@ -536,13 +537,13 @@ function preventScroll(e) {
 // 获取页面的 层级
 function geyAllDomMaxZindex() {
  // 获取页面上所有元素
- var allElements = document.querySelectorAll('*');
+ let allElements = document.querySelectorAll('*');
  // 初始化最高z-index值为一个较小的负数
- var highestZIndex = -1;
+ let highestZIndex = -1;
  // 遍历所有元素
  allElements.forEach(function (element) {
   // 获取当前元素的z-index属性
-  var zIndex = window.getComputedStyle(element).getPropertyValue('z-index');
+  let zIndex = window.getComputedStyle(element).getPropertyValue('z-index');
   // 将z-index属性的值转换为整数
   zIndex = parseInt(zIndex, 10);
   // 检查z-index是否有效且比当前最高值高
@@ -585,4 +586,22 @@ function throttle(func, delay) {
       lastTime = now;
     }
   };
+}
+
+// 判断是移动端还是pc端
+function iswap() {
+ let uA = navigator.userAgent.toLowerCase(); 
+ let ipad = uA.match(/ipad/i) == "ipad"; 
+ let iphone = uA.match(/iphone os/i) == "iphone os"; 
+ let midp = uA.match(/midp/i) == "midp"; 
+ let uc7 = uA.match(/rv:1.2.3.4/i) == "rv:1.2.3.4"; 
+ let uc = uA.match(/ucweb/i) == "ucweb"; 
+ let android = uA.match(/android/i) == "android"; 
+ let windowsce = uA.match(/windows ce/i) == "windows ce"; 
+ let windowsmd = uA.match(/windows mobile/i) == "windows mobile"; 
+ if (!(ipad || iphone || midp || uc7 || uc || android || windowsce || windowsmd)) {  
+   return "pc"
+ } else {        
+   return "phone"
+ }
 }

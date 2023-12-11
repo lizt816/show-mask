@@ -1,3 +1,4 @@
+import Vue from 'vue'
 // 初始大小
 let MyshowMaskAmplify = 10;
 let MyshowMaskRotate = 0;
@@ -5,7 +6,9 @@ let MyshowMaskDiv, MyshowMaskImg;
 let MyshowMaskMyurlLis = []
 let MyshowMaskMyindex = 0;
 let MyshowMaskSetCursorTimer = null;
-let myThrottle = throttle(touchmoveSetImg,100);  // 节流 只能被调用一次
+let myThrottle = throttle(doubleFingerAmplification,80);  // 节流 只能被调用一次
+let iconMyThrottle = throttle(doubleFingerAmplification,300);  // 图标放大 节流 只能被调用一次
+
 export function showMask(urlList, index = 0) {
  // 创建遮罩元素
  MyshowMaskDiv = document.createElement('div');
@@ -53,14 +56,14 @@ export function showMask(urlList, index = 0) {
     // 放大图标
     if (domListECssArr.indexOf('my-show-mask-box-amplify') > -1) {
      domListE.addEventListener('click', function () {
-      touchmoveSetImg(true)
+      iconMyThrottle(true,0.3)
      })
     }
     // 缩小图标
     if (domListECssArr.indexOf('my-show-mask-box-reduce') > -1) {
      domListE.addEventListener('click', function () {
       if (MyshowMaskAmplify < 100) return;
-      touchmoveSetImg(false)
+      iconMyThrottle(false,0.3)
      })
     }
     // 还原1:1图标
@@ -137,11 +140,11 @@ function setImg(rect1, addType, e, type) {
 }
 // 图标缩放图片
 let timerAmplify = null;
-function iocSetImg(w2, w1, h2, h1, delay) {
+function iocSetImg(w2, w1, h2, h1, delay,top=0.5,left=0.5) {
  MyshowMaskImg.style.transition = `all ${delay}s linear`;
  MyshowMaskImg.style.width = `${(MyshowMaskAmplify)}px`;
- MyshowMaskImg.style.left = Number(MyshowMaskImg.style.left.replaceAll('px', '')) - ((w2 - w1) * 0.5) + 'px';
- MyshowMaskImg.style.top = Number(MyshowMaskImg.style.top.replaceAll('px', '')) - ((h2 - h1) * 0.5) + 'px';
+ MyshowMaskImg.style.left = Number(MyshowMaskImg.style.left.replaceAll('px', '')) - ((w2 - w1) * left) + 'px';
+ MyshowMaskImg.style.top = Number(MyshowMaskImg.style.top.replaceAll('px', '')) - ((h2 - h1) * top) + 'px';
  clearTimeout(timerAmplify)
  timerAmplify = setTimeout(() => {
   MyshowMaskImg.style.transition = 'none';
@@ -314,9 +317,9 @@ function initImg(url) {
         );
         // 判断是放大还是缩小
         if (currentDistance > initialDistance) {
-          myThrottle(true,0.1)  // 动画时间和节流事件相等
+          myThrottle(true,0.08)  // 动画时间和节流事件相等
         } else {
-          myThrottle(false,0.1)  // 动画时间和节流事件相等
+          myThrottle(false,0.08)  // 动画时间和节流事件相等
         }
         initialDistance = currentDistance;
       }
@@ -359,6 +362,68 @@ function initImg(url) {
   }
   // #endregion 
  })
+}
+// 手指放大
+function doubleFingerAmplification(is,delay){
+  let w1,h1,w2,h2;
+  if(is){
+    // 放大
+    MyshowMaskAmplify *= 1.2;
+    w1 = Number(MyshowMaskImg.offsetWidth);
+    h1 = Number(MyshowMaskImg.offsetHeight);
+    // 计算出产生的宽度
+    w2 = w1 * 1.2;
+    h2 = h1 * 1.2;
+  } else{
+    // 缩小
+    if (MyshowMaskAmplify < 100) return;
+    MyshowMaskAmplify /= 1.2
+    w1 = Number(MyshowMaskImg.offsetWidth);
+    h1 = Number(MyshowMaskImg.offsetHeight);
+    w2 = w1 / 1.2;
+    h2 = h1 / 1.2;
+  }
+  MyshowMaskImg.style.transition = `all ${delay}s linear`;
+  MyshowMaskImg.style.width = `${(MyshowMaskAmplify)}px`;
+
+  let offsetTop = 0.5;  // 位置的偏移量
+  let offsetLeft = 0.5;  // 位置的偏移量
+  // 获取到屏幕的位置 
+  let winW = window.innerWidth/2;
+  let winH = window.innerHeight/2;
+  let domLeft = MyshowMaskImg.offsetLeft;
+  let domTop = MyshowMaskImg.offsetTop;
+  let domW = MyshowMaskImg.offsetWidth;
+  let domH = MyshowMaskImg.offsetHeight;
+
+  // left 在视口居中的位置时
+  if(domLeft < winW){
+    // 如果 right 没超出 了居中位置
+    if((domW + domLeft) < winW ){
+      offsetLeft = 1;  // 放大 right 那边
+    } else{
+      // 表示内容在 居中位置
+      offsetLeft = (winW - domLeft) / domW
+    }
+  }else{
+    // 放大left位置
+    offsetLeft = 0.1;
+  }
+
+  // top 在视口居中的位置时
+  if(domTop < winH){
+    // 如果 top 没超出 了居中位置
+    if((domH + domTop) < winH ){
+      offsetTop = 1;  // 放大 bottom 那边
+    } else{
+      // 表示内容在 居中位置
+      offsetTop = (winH - domTop) / domH
+    }
+  }else{
+    // 放大top位置
+    offsetTop = 0.1;
+  }
+  iocSetImg(w2, w1, h2, h1,delay,offsetTop,offsetLeft)
 }
 // 生成旋转，放大缩小图标
 function setIco() {

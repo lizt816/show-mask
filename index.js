@@ -1,4 +1,3 @@
-import Vue from 'vue'
 // 初始大小
 let MyshowMaskAmplify = 10;
 let MyshowMaskRotate = 0;

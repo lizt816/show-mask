@@ -17,7 +17,7 @@ export function showMask(urlList, index = 0,callback) {
  MyshowMaskDiv = document.createElement('div');
  MyshowMaskDiv.style.position = 'fixed';
  MyshowMaskDiv.style.pointerEvents = 'auto';   // 点击事件的影响
- MyshowMaskDiv.style.zIndex = geyAllDomMaxZindex() + '10';
+ MyshowMaskDiv.style.zIndex = geyAllDomMaxZindex();
  MyshowMaskDiv.style.left = '0';
  MyshowMaskDiv.style.right = '0';
  MyshowMaskDiv.style.bottom = '0';
@@ -621,7 +621,7 @@ function geyAllDomMaxZindex() {
   zIndex = parseInt(zIndex, 10);
   // 检查z-index是否有效且比当前最高值高
   if (!isNaN(zIndex) && zIndex > highestZIndex) {
-   highestZIndex = zIndex;
+   highestZIndex = Number(zIndex) +1 ;
   }
  });
  return highestZIndex

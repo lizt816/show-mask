@@ -253,122 +253,115 @@ function loadImg(){
     MyshowMaskImg.style.left = MyshowMaskImg.offsetLeft + 'px';
     
     // PC端拖拽
-    if(iswap() === 'pc'){
-      MyshowMaskImg.addEventListener('mousedown', function (e) {
-        if (MyshowMaskSetCursorTimer) {
-         clearTimeout(MyshowMaskSetCursorTimer)
-        }
-        MyshowMaskImg.style.cursor = 'grabbing';
-        let x = e.pageX - MyshowMaskImg.offsetLeft;
-        let y = e.pageY - MyshowMaskImg.offsetTop;
-        window.onmousemove = function (e) {
-         let cx = e.pageX - x;
-         let cy = e.pageY - y;
-         MyshowMaskImg.style.top = cy + 'px';
-         MyshowMaskImg.style.left = cx + 'px';
-        }
-        window.onmouseup = function (e) {
-         MyshowMaskImg.style.cursor = 'grab';
-         window.onmousemove = null;
-         window.onmouseup = null;
-        }
-       })
-    }
+    MyshowMaskImg.addEventListener('mousedown', function (e) {
+     if (MyshowMaskSetCursorTimer) {
+      clearTimeout(MyshowMaskSetCursorTimer)
+     }
+     MyshowMaskImg.style.cursor = 'grabbing';
+     let x = e.pageX - MyshowMaskImg.offsetLeft;
+     let y = e.pageY - MyshowMaskImg.offsetTop;
+     window.onmousemove = function (e) {
+      let cx = e.pageX - x;
+      let cy = e.pageY - y;
+      MyshowMaskImg.style.top = cy + 'px';
+      MyshowMaskImg.style.left = cx + 'px';
+     }
+     window.onmouseup = function (e) {
+      MyshowMaskImg.style.cursor = 'grab';
+      window.onmousemove = null;
+      window.onmouseup = null;
+     }
+    })
     // 移动端 拖拽
     let start = false;   // 控制缩放
-    if(iswap() === 'phone'){
-      let isDragging = false;
-      let offsetX, offsetY;
-      // 触摸开始
-      MyshowMaskImg.addEventListener('touchstart', function (e) {
-        const touch = e.touches[0];
-        offsetX = touch.clientX - MyshowMaskImg.getBoundingClientRect().left;
-        offsetY = touch.clientY - MyshowMaskImg.getBoundingClientRect().top;
-        isDragging = true;
-      });
-      // 触摸移动
-      MyshowMaskImg.addEventListener('touchmove', function (e) {
-        if (isDragging && !start) {
-          const touch = e.touches[0];
-          const newX = touch.clientX - offsetX;
-          const newY = touch.clientY - offsetY;
-          // 更新元素位置
-          MyshowMaskImg.style.left = `${newX}px`;
-          MyshowMaskImg.style.top = `${newY}px`;
+    let isDragging = false;
+    let offsetX, offsetY;
+    // 触摸 接触开始
+    let initialDistance = 0;  // 双指的距离位置
+
+
+    // 开始触摸
+    MyshowMaskDiv.addEventListener('touchstart', function (e) {
+      const touches = e.touches;
+
+      if (touches.length === 2) {
+        // 双指的情况
+        start = true;
+        initialDistance = Math.hypot(
+          touches[0].pageX - touches[1].pageX,
+          touches[0].pageY - touches[1].pageY
+        );
+        return;
+      }
+
+      const touch = touches[0];
+      offsetX = touch.clientX - MyshowMaskImg.getBoundingClientRect().left;
+      offsetY = touch.clientY - MyshowMaskImg.getBoundingClientRect().top;
+      isDragging = true;
+    });
+    // 触摸移动
+    MyshowMaskDiv.addEventListener('touchmove', function (e) {
+      const touches = e.touches;
+
+      // 双指 放大缩小
+      if (touches.length === 2 && start) {
+        const currentDistance = Math.hypot(
+          touches[0].pageX - touches[1].pageX,
+          touches[0].pageY - touches[1].pageY
+        );
+        // 判断是放大还是缩小
+        if (currentDistance > initialDistance) {
+          myThrottle(true,0.08)  // 动画时间和节流事件相等
+        } else {
+          myThrottle(false,0.08)  // 动画时间和节流事件相等
         }
-      });
-      // 触摸结束
-      MyshowMaskImg.addEventListener('touchend', function () {
-        isDragging = false;
-      });
-    }
-    // 双指放大缩小
-    if(iswap() === 'phone'){
-      // 监听触摸开始事件
-      let initialDistance = 0;  // 双指的距离位置
-      MyshowMaskDiv.addEventListener('touchstart', function (e) {
-        const touches = e.touches;
-        if (touches.length === 2) {
-          start = true;
-          initialDistance = Math.hypot(
-            touches[0].pageX - touches[1].pageX,
-            touches[0].pageY - touches[1].pageY
-          );
-        }
-      });
-  
-      // 监听触摸移动事件
-      MyshowMaskDiv.addEventListener('touchmove', function (e) {
-        const touches = e.touches;
-        if (touches.length === 2 && start) {
-          const currentDistance = Math.hypot(
-            touches[0].pageX - touches[1].pageX,
-            touches[0].pageY - touches[1].pageY
-          );
-          // 判断是放大还是缩小
-          if (currentDistance > initialDistance) {
-            myThrottle(true,0.08)  // 动画时间和节流事件相等
-          } else {
-            myThrottle(false,0.08)  // 动画时间和节流事件相等
-          }
-          initialDistance = currentDistance;
-        }
-      });
-  
-      // 监听触摸结束事件
-      MyshowMaskDiv.addEventListener('touchend', function () {
-        start = false;
-        initialDistance=0;
-      });
-    }
+        initialDistance = currentDistance;
+        return
+      }
+
+      // 拖拽
+      if (isDragging && !start) {
+        const touch = touches[0];
+        const newX = touch.clientX - offsetX;
+        const newY = touch.clientY - offsetY;
+        // 更新元素位置
+        MyshowMaskImg.style.left = `${newX}px`;
+        MyshowMaskImg.style.top = `${newY}px`;
+      }
+    });
+
+    // 监听触摸结束事件
+    MyshowMaskDiv.addEventListener('touchend', function () {
+      start = false;
+      initialDistance = 0;
+      isDragging = false;
+    });
     // 添加滚轮放大缩小
-    if(iswap() === 'pc'){
-      MyshowMaskImg.addEventListener('wheel', function (e) {
-        // 获取图片信息
-        let rect1 = MyshowMaskImg.getBoundingClientRect();
-        if (e.deltaY < 0) {
-         // 放大宽度，并且定位指定的位置
-         setImg(rect1, 'add', e, 'large')
-         clearTimeout(MyshowMaskSetCursorTimer)
-         MyshowMaskImg.style.cursor = 'zoom-in'
-         MyshowMaskSetCursorTimer = setTimeout(() => {
-          MyshowMaskImg.style.cursor = 'grab'
-         }, 500)
-        }
-        if (e.deltaY > 0) {
-         if (MyshowMaskAmplify < 100) return;
-         // 缩小
-         setImg(rect1, 'reduce', e, 'small')
-         MyshowMaskImg.style.cursor = 'zoom-out'
-         clearTimeout(MyshowMaskSetCursorTimer)
-         MyshowMaskSetCursorTimer = setTimeout(() => {
-          MyshowMaskImg.style.cursor = 'grab'
-         }, 500)
-        }
-        // 清除浏览器默认行为，---可能会造成滚动页面 
-        e.preventDefault();
-       })
-    }
+    MyshowMaskImg.addEventListener('wheel', function (e) {
+      // 获取图片信息
+      let rect1 = MyshowMaskImg.getBoundingClientRect();
+      if (e.deltaY < 0) {
+       // 放大宽度，并且定位指定的位置
+       setImg(rect1, 'add', e, 'large')
+       clearTimeout(MyshowMaskSetCursorTimer)
+       MyshowMaskImg.style.cursor = 'zoom-in'
+       MyshowMaskSetCursorTimer = setTimeout(() => {
+        MyshowMaskImg.style.cursor = 'grab'
+       }, 500)
+      }
+      if (e.deltaY > 0) {
+       if (MyshowMaskAmplify < 100) return;
+       // 缩小
+       setImg(rect1, 'reduce', e, 'small')
+       MyshowMaskImg.style.cursor = 'zoom-out'
+       clearTimeout(MyshowMaskSetCursorTimer)
+       MyshowMaskSetCursorTimer = setTimeout(() => {
+        MyshowMaskImg.style.cursor = 'grab'
+       }, 500)
+      }
+      // 清除浏览器默认行为，---可能会造成滚动页面 
+      e.preventDefault();
+     })
 }
 // 手指放大
 function doubleFingerAmplification(is,delay){
@@ -624,28 +617,6 @@ function geyAllDomMaxZindex() {
   }
  });
  return highestZIndex
-}
-// 放大或者缩小
-function touchmoveSetImg(is,delay=0.3){
-  if(is){
-    // 放大
-    MyshowMaskAmplify *= 1.2;
-    let w1 = Number(MyshowMaskImg.offsetWidth);
-    let h1 = Number(MyshowMaskImg.offsetHeight);
-    // 计算出产生的宽度
-    let w2 = w1 * 1.2;
-    let h2 = h1 * 1.2;
-    iocSetImg(w2, w1, h2, h1,delay)
-  } else{
-    // 缩小
-    if (MyshowMaskAmplify < 100) return;
-    MyshowMaskAmplify /= 1.2
-    let w1 = Number(MyshowMaskImg.offsetWidth);
-    let h1 = Number(MyshowMaskImg.offsetHeight);
-    let w2 = w1 / 1.2;
-    let h2 = h1 / 1.2;
-    iocSetImg(w2, w1, h2, h1,delay)
-  }
 }
 // 节流
 function throttle(func, delay) {

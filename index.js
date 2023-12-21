@@ -1,4 +1,20 @@
-export function showMask(urlList, index = 0, callback) {
+function cb(key) {
+ // 空函数  当不传 回调的时候 触发
+}
+export function showMask(urlList, index = 0, callback = cb) {
+ if (urlList && urlList.length > -1) {
+   if (Object.prototype.toString.call(urlList).indexOf("Array") === -1) {
+     throw new Error(urlList + 'Not the correct array,Please pass the correct array');
+   }
+   if (urlList.length <= 0) {
+     throw new Error('You passed in an empty array');
+   }
+ } else {
+   throw new Error('Please pass the correct array');
+ }
+ if (isNaN(Number(index))) {
+   throw new Error(index + 'Not the correct index,Please pass the correct index');
+ }
  let maxZIndex = geyAllDomMaxZindex();
  // 防止页面滚动
  window.addEventListener('wheel', preventScroll, {

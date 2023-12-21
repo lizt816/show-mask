@@ -268,7 +268,8 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
  function loadImg(i, imgLoadingDiv) {
    imgLoadingDiv.remove();  // 清除 loading 动画
    callback(imgStateMessage, i)
-   MyshowMaskAmplify = MyshowMaskImg.width > window.innerWidth ? window.innerWidth : MyshowMaskImg.width;
+   let winWid = iswap() === 'pc' ? window.innerWidth * 0.5 : window.innerWidth;
+   MyshowMaskAmplify = MyshowMaskImg.width > winWid ? winWid : MyshowMaskImg.width;
    MyshowMaskImg.style.width = MyshowMaskAmplify + 'px';
    MyshowMaskImg.style.position = 'absolute';
    MyshowMaskImg.draggable = 'true';

@@ -38,6 +38,7 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
  let MyshowMaskSetCursorTimer = null;
  let myThrottle = throttle(doubleFingerAmplification, 80);  // 节流 只能被调用一次
  let iconMyThrottle = throttle(doubleFingerAmplification, 300);  // 图标放大 节流 只能被调用一次
+ let setImgThrottle = throttle(setImg, 50);  // 鼠标放大节流
  // 创建遮罩元素
  MyshowMaskDiv = document.createElement('div');
  MyshowMaskDiv.style.position = 'fixed';
@@ -383,7 +384,7 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
      let rect1 = MyshowMaskImg.getBoundingClientRect();
      if (e.deltaY < 0) {
        // 放大宽度，并且定位指定的位置
-       setImg(rect1, 'add', e, 'large')
+       setImgThrottle(rect1, 'add', e, 'large')
        clearTimeout(MyshowMaskSetCursorTimer)
        MyshowMaskImg.style.cursor = 'zoom-in'
        MyshowMaskSetCursorTimer = setTimeout(() => {
@@ -393,7 +394,7 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
      if (e.deltaY > 0) {
        if (MyshowMaskAmplify < 100) return;
        // 缩小
-       setImg(rect1, 'reduce', e, 'small')
+       setImgThrottle(rect1, 'reduce', e, 'small')
        MyshowMaskImg.style.cursor = 'zoom-out'
        clearTimeout(MyshowMaskSetCursorTimer)
        MyshowMaskSetCursorTimer = setTimeout(() => {

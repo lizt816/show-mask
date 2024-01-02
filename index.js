@@ -38,7 +38,7 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
  let MyshowMaskSetCursorTimer = null;
  let myThrottle = throttle(doubleFingerAmplification, 80);  // 节流 只能被调用一次
  let iconMyThrottle = throttle(doubleFingerAmplification, 300);  // 图标放大 节流 只能被调用一次
- let setImgThrottle = throttle(setImg, 50);  // 鼠标放大节流
+ let wheelImgThrottle = throttle(wheelImg, 300);  // 鼠标放大节流
  // 创建遮罩元素
  MyshowMaskDiv = document.createElement('div');
  MyshowMaskDiv.style.position = 'fixed';
@@ -134,40 +134,50 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
    }
  })
  // 滚轮缩放图片
- function setImg(rect1, addType, e, type) {
+ let verticalScalingTimer = null;
+ function setImg(addType, e, type) {
+   let rect1 = MyshowMaskImg.getBoundingClientRect();
+   let multiple = 1.35;
+   clearTimeout(verticalScalingTimer)
+   MyshowMaskImg.style.transition = `all ${0.3}s linear`;  // 添加过渡
    if (MyshowMaskRotate === 0 || MyshowMaskRotate === 180 || MyshowMaskRotate === 360) {
-     MyshowMaskAmplify = addType === 'add' ? MyshowMaskAmplify + (MyshowMaskAmplify * 0.2) : MyshowMaskAmplify - (MyshowMaskAmplify * 0.2);
-     MyshowMaskImg.style.width = MyshowMaskAmplify + 'px';
-     // 放大后在获取一次图片信息
-     let rect2 = MyshowMaskImg.getBoundingClientRect();
-     // 不旋转公式一，不旋转: 位置的偏移 - ((放大后的图片宽度 - 放大前的宽度) * (当前鼠标位置 / 图片的总宽度))
-     MyshowMaskImg.style.left = (rect2.left - ((rect2.width - rect1.width) * (e.clientX - rect1.left) / rect1.width)) + 'px';
-     MyshowMaskImg.style.top = (rect2.top - ((rect2.height - rect1.height) * (e.clientY - rect1.top) / rect1.height)) + 'px';
+     // 得出最新宽度
+     addType === 'add' ? MyshowMaskAmplify *= multiple : MyshowMaskAmplify /= multiple;
+     MyshowMaskImg.style.width = MyshowMaskAmplify + 'px';  // 计算出放大或者缩小0.2 倍后的值
+     // 计算出放大后的高度
+     let height = addType === 'add' ? rect1.height * multiple : rect1.height / multiple;
+
+     // 不旋转公式一，不旋转: (位置的偏移 - ((放大后的图片宽度 - 放大前的宽度) * 当前鼠标位置 / 图片的总宽度))
+     MyshowMaskImg.style.left = (rect1.left - ((MyshowMaskAmplify - rect1.width) * (e.clientX - rect1.left) / rect1.width)) + 'px';
+     MyshowMaskImg.style.top = (rect1.top - ((height - rect1.height) * (e.clientY - rect1.top) / rect1.height)) + 'px';
    } else {
      if (type === 'large') {
        // 放大
-       MyshowMaskAmplify *= 1.2;
+       MyshowMaskAmplify *= multiple;
        let w1 = Number(MyshowMaskImg.offsetWidth);
        let h1 = Number(MyshowMaskImg.offsetHeight);
        // 计算出产生的宽度
-       let w2 = w1 * 1.2;
-       let h2 = h1 * 1.2;
+       let w2 = w1 * multiple;
+       let h2 = h1 * multiple;
        verticalScaling(w2, w1, h2, h1, e, type)
      } else {
        // 缩小
        if (MyshowMaskAmplify < 100) return;
-       MyshowMaskAmplify /= 1.2
+       MyshowMaskAmplify /= multiple
        let w1 = Number(MyshowMaskImg.offsetWidth);
        let h1 = Number(MyshowMaskImg.offsetHeight);
-       let w2 = w1 / 1.2;
-       let h2 = h1 / 1.2;
+       let w2 = w1 / multiple;
+       let h2 = h1 / multiple;
        verticalScaling(w2, w1, h2, h1, e)
      }
    }
+   verticalScalingTimer = setTimeout(() => {
+     MyshowMaskImg.style.transition = 'none';
+   }, 300);
  }
  // 图标缩放图片
  let timerAmplify = null;
- function iocSetImg(w2, w1, h2, h1, delay, top = 0.5, left = 0.5) {
+ function setIocImg(w2, w1, h2, h1, delay, top = 0.5, left = 0.5) {
    MyshowMaskImg.style.transition = `all ${delay}s linear`;
    MyshowMaskImg.style.width = `${(MyshowMaskAmplify)}px`;
    MyshowMaskImg.style.left = Number(MyshowMaskImg.style.left.replaceAll('px', '')) - ((w2 - w1) * left) + 'px';
@@ -177,6 +187,8 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
      MyshowMaskImg.style.transition = 'none';
    }, 300);
  }
+
+
  // 竖向缩放
  function verticalScaling(w2, w1, h2, h1, e, t) {
    let h = Number(e.target.offsetHeight); // 放大缩小前的高度
@@ -218,7 +230,6 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
      percentageLeft = (y + (boxWidth / 2 - boxHeight / 2)) / w;
      percentageTop = ((boxWidth - x) + (boxHeight / 2 - boxWidth / 2)) / h;
    }
-
 
    MyshowMaskImg.style.left = left - ((w2 - w1) * (percentageLeft)) + 'px';
    MyshowMaskImg.style.top = top - ((h2 - h1) * (percentageTop)) + 'px';
@@ -380,30 +391,30 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
    });
    // 添加滚轮放大缩小
    MyshowMaskImg.addEventListener('wheel', function (e) {
-     // 获取图片信息
-     let rect1 = MyshowMaskImg.getBoundingClientRect();
-     if (e.deltaY < 0) {
-       // 放大宽度，并且定位指定的位置
-       setImgThrottle(rect1, 'add', e, 'large')
-       clearTimeout(MyshowMaskSetCursorTimer)
-       MyshowMaskImg.style.cursor = 'zoom-in'
-       MyshowMaskSetCursorTimer = setTimeout(() => {
-         MyshowMaskImg.style.cursor = 'grab'
-       }, 500)
-     }
-     if (e.deltaY > 0) {
-       if (MyshowMaskAmplify < 100) return;
-       // 缩小
-       setImgThrottle(rect1, 'reduce', e, 'small')
-       MyshowMaskImg.style.cursor = 'zoom-out'
-       clearTimeout(MyshowMaskSetCursorTimer)
-       MyshowMaskSetCursorTimer = setTimeout(() => {
-         MyshowMaskImg.style.cursor = 'grab'
-       }, 500)
-     }
+     // 使用节流 放大缩小 图片
+     wheelImgThrottle(e)
      // 清除浏览器默认行为，---可能会造成滚动页面 
      e.preventDefault();
    })
+ }
+ function wheelImg(e) {
+   // 放大或者缩小  
+   if (e.deltaY < 0) {
+     // 放大宽度，并且定位指定的位置
+     setImg('add', e, 'large')
+     MyshowMaskImg.style.cursor = 'zoom-in'
+   }
+   if (e.deltaY > 0) {
+     if (MyshowMaskAmplify < 100) return;
+     // 缩小
+     setImg('reduce', e, 'small')
+     MyshowMaskImg.style.cursor = 'zoom-out'
+   }
+   clearTimeout(MyshowMaskSetCursorTimer)
+   MyshowMaskSetCursorTimer = setTimeout(() => {
+     MyshowMaskImg.style.cursor = 'grab'
+   }, 500)
+   // 设置五秒是因为 存在节流，需要推后 变化手势，不然节流刚好结束 就触发手势变化
  }
  // 手指放大
  function doubleFingerAmplification(is, delay) {
@@ -465,7 +476,7 @@ function createMyshowMaskDiv(list, index, showIndex, callback, maxZIndex) {
      // 放大top位置
      offsetTop = 0.1;
    }
-   iocSetImg(w2, w1, h2, h1, delay, offsetTop, offsetLeft)
+   setIocImg(w2, w1, h2, h1, delay, offsetTop, offsetLeft)
  }
  // 切换图片
  function changeImg(index) {
